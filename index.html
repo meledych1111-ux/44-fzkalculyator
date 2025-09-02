@@ -3,32 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор пени по 44-ФЗ для поставщика</title>
+    <title>Калькулятор пени по 44-ФЗ</title>
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            line-height: 1.6; 
-            color: #333; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background-color: #f5f5f5; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .container { 
-            background: white; 
-            border-radius: 10px; 
-            padding: 25px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-            margin-bottom: 20px; 
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        h1, h2 { 
-            color: #2c3e50; 
-            text-align: center; 
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        h1 { 
-            margin-bottom: 10px; 
-            font-size: 2.2em; 
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
-        h2 { 
-            font-size: 1.
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #6a11cb;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            color: #666;
+            font-size: 1.2em;
+            font-weight: normal;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #6a11cb;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #6a11cb;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+            transform: scale(1.02);
+            background: white;
+        }
+
+        input:hover {
+            border-color: #b399ff;
+        }
+
+        .hint {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(106, 17, 203, 0.4);
+            background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(106, 17, 203, 0.3);
+        }
+
+        .result-container {
+            display: none;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border-left: 5px solid #28a745;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            margin: 15px 0;
+        }
+
+        .final-result {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            border: 2px dashed #28a745;
+            margin: 20px 0;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+            display: none;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .days-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 15px 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            input {
+                padding: 12px;
+            }
+            
+            .calculate-btn {
+                padding: 15px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Калькулятор пени по 44-ФЗ</h1>
+            <h2>для поставщика (исполнителя, подрядчика)</h2>
+        </div>
+
+        <div class="formula-box">
+            <div class="formula">П = (Ц - И) × (1/300 × КСЦБ) × ДП</div>
+        </div>
+
+        <div class="input-group">
+            <label for="contractPrice">Цена контракта (Ц), руб.:</label>
+            <input type="text" id="contractPrice" inputmode="decimal" placeholder="1 000 000,00" required>
+            <p class="hint">Общая стоимость контракта согласно документации</p>
+
+            <label for="executedAmount">Сумма исполненных обязательств (И), руб.:</label>
+            <input type="text" id="executedAmount" inputmode="decimal" placeholder="500 000,00" required>
+            <p class="hint">Сумма, которую заказчик уже принял по акту</p>
+
+            <label for="keyRate">Ключевая ставка ЦБ РФ (КСЦБ), %:</label>
+            <input type="text" id="keyRate" inputmode="decimal" placeholder="16,00" required>
+            <p class="hint">Узнайте актуальную ставку на <a href="https://cbr.ru/" target="_blank">сайте ЦБ РФ</a></p>
+
+            <div class="warning" id="warning">
+                <strong>Внимание!</strong> Введенная ключевая ставка выглядит нереалистично. Пожалуйста, проверьте значение.
+            </div>
+
+            <label for="dueDate">Дата исполнения обязательства по контракту:</label>
+            <input type="date" id="dueDate" required>
+            <p class="hint">Дата, до которой должны были быть выполнены работы/поставлен товар</p>
+
+            <label for="actualDate">Фактическая дата исполнения обязательства:</label>
+            <input type="date" id="actualDate" required>
+            <p class="hint">Дата, когда работы/товар были фактически приняты заказчиком</p>
+
+            <div class="days-info" id="daysInfo">
+                <strong>Расчет дней просрочки:</strong>
+                <div id="daysCalculation"></div>
+            </div>
+        </div>
+
+        <button class="calculate-btn" id="calculateBtn" onclick="calculatePenalty()">
+            📊 Рассчитать пеню
+        </button>
+
+        <div class="result-container" id="result">
+            <div class="result-item">
+                <strong>Исходные данные:</strong>
+                <div id="inputData"></div>
+            </div>
+            
+            <div class="result-item">
+                <strong>Формула расчета:</strong>
+                <div id="calculationFormula"></div>
+            </div>
+            
+            <div class="result-item">
+                <strong>Сумма пени к уплате:</strong>
+                <div id="penaltyResult" class="final-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Функции для точных вычислений с деньгами
+        function parseMoney(value) {
+            // Заменяем запятые на точки и убираем пробелы
+            const cleaned = value.replace(/[^\d,]/g, '').replace(',', '.');
+            return parseFloat(cleaned) || 0;
+        }
+
+        function formatMoney(amount) {
+            // Округляем до 2 знаков после запятой и форматируем с пробелами тысяч
+            return new Intl.NumberFormat('ru-RU', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        function preciseMultiply(a, b) {
+            // Умножение с точностью до копеек
+            return Math.round(a * b * 100) / 100;
+        }
+
+        function calculateDays() {
+            const dueDate = new Date(document.getElementById('dueDate').value);
+            const actualDate = new Date(document.getElementById('actualDate').value);
+            const daysInfo = document.getElementById('daysInfo');
+            const daysCalculation = document.getElementById('daysCalculation');
+            const calculateBtn = document.getElementById('calculateBtn');
+
+            if (isNaN(dueDate.getTime()) || isNaN(actualDate.getTime())) {
+                daysInfo.style.display = 'none';
+                calculateBtn.disabled = true;
+                return 0;
+            }
+
+            const timeDiff = actualDate - dueDate;
+            const daysDiff = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+
+            daysInfo.style.display = 'block';
+            
+            if (daysDiff === 0) {
+                daysCalculation.innerHTML = '✅ Просрочки нет. Обязательства исполнены в срок.';
+                calculateBtn.disabled = true;
+            } else {
+                daysCalculation.innerHTML = `
+                    📅 Дата исполнения: <b>${dueDate.toLocaleDateString('ru-RU')}</b><br>
+                    📅 Фактическая дата: <b>${actualDate.toLocaleDateString('ru-RU')}</b><br>
+                    ⏰ Дней просрочки (ДП): <b>${daysDiff}</b> дней
+                `;
+                calculateBtn.disabled = false;
+            }
+
+            return daysDiff;
+        }
+
+        function calculatePenalty() {
+            const result = document.getElementById('result');
+            const warning = document.getElementById('warning');
+            
+            result.style.display = 'none';
+            warning.style.display = 'none';
+
+            // Парсим значения с учетом денежного формата
+            const C = parseMoney(document.getElementById('contractPrice').value);
+            const I = parseMoney(document.getElementById('executedAmount').value);
+            const KS = parseMoney(document.getElementById('keyRate').value);
+            const DP = calculateDays();
+
+            // Валидация
+            if (C <= 0 || I < 0 || KS <= 0 || DP === 0 || I > C) {
+                alert("Пожалуйста, проверьте введенные данные. Все значения должны быть корректными.");
+                return;
+            }
+
+            if (KS < 1 || KS > 25) {
+                warning.style.display = 'block';
+            }
+
+            // Точный расчет
+            const base = C - I;
+            const dailyRate = preciseMultiply(base, KS / 100 / 300);
+            const penalty = preciseMultiply(dailyRate, DP);
+
+            // Форматируем вывод
+            document.getElementById('inputData').innerHTML = `
+                💰 Цена контракта (Ц) = <b>${formatMoney(C)}</b> руб.<br>
+                ✅ Принятые обязательства (И) = <b>${formatMoney(I)}</b> руб.<br>
+                ⚠️ Неисполненная часть (Ц - И) = <b>${formatMoney(base)}</b> руб.<br>
+                📈 Ключевая ставка ЦБ = <b>${KS}%</b><br>
+                📅 Дней просрочки = <b>${DP}</b>
+            `;
+
+            document.getElementById('calculationFormula').innerHTML = `
+                <b>П = (Ц - И) × (1/300 × КСЦБ) × ДП</b><br>
+                <b>П = (${formatMoney(C)} - ${formatMoney(I)}) × (1/300 × ${KS}%) × ${DP}</b><br>
+                <b>П = ${formatMoney(base)} × ${(KS/100/300).toFixed(7)} × ${DP}</b>
+            `;
+
+            document.getElementById('penaltyResult').innerHTML = `${formatMoney(penalty)} руб.`;
+            result.style.display = 'block';
+        }
+
+        // Автоматический формат ввода для денежных полей
+        document.querySelectorAll('input[inputmode="decimal"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^\d,]/g, '');
+                
+                // Добавляем пробелы тысяч
+                if (value.length > 3) {
+                    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+                }
+                
+                e.target.value = value;
+            });
+        });
+
+        // Обработчики для дат
+        document.getElementById('dueDate').addEventListener('change', calculateDays);
+        document.getElementById('actualDate').addEventListener('change', calculateDays);
+
+        // Установка значений по умолчанию
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            document.getElementById('actualDate').value = today;
+            document.getElementById('dueDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            
+            calculateDays();
+        });
+    </script>
+</body>
+</html>
