@@ -212,7 +212,7 @@
 
         <div class="input-group">
             <label for="contractPrice">Цена контракта (Ц), руб.:</label>
-            <input type="text" id="contractPrice" inputmode="decimal" placeholder="58 995 580,85" required>
+            <input type="text" id="contractPrice" inputmode="decimal" placeholder="Введите сумму" required>
             <p class="hint">Общая стоимость контракта согласно документации</p>
 
             <label for="executedAmount">Сумма исполненных обязательств (И), руб.:</label>
@@ -220,7 +220,7 @@
             <p class="hint">Сумма, которую заказчик уже принял по акту</p>
 
             <label for="keyRate">Ключевая ставка ЦБ РФ (КСЦБ), %:</label>
-            <input type="text" id="keyRate" inputmode="decimal" placeholder="18,00" required>
+            <input type="text" id="keyRate" inputmode="decimal" placeholder="16,00" required>
             <p class="hint">Узнайте актуальную ставку на <a href="https://cbr.ru/" target="_blank">сайте ЦБ РФ</a></p>
 
             <div class="warning" id="warning">
@@ -277,10 +277,6 @@
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }).format(amount);
-        }
-
-        function formatFromKopeks(kopeks) {
-            return (kopeks / 100).toFixed(2);
         }
 
         function calculateDays() {
@@ -390,20 +386,15 @@
         document.getElementById('dueDate').addEventListener('change', calculateDays);
         document.getElementById('actualDate').addEventListener('change', calculateDays);
 
-        // Установка значений по умолчанию для тестового расчета
+        // Установка значений по умолчанию
         document.addEventListener('DOMContentLoaded', function() {
-            // Устанавливаем тестовые значения
-            document.getElementById('contractPrice').value = '58 995 580,85';
-            document.getElementById('executedAmount').value = '0,00';
-            document.getElementById('keyRate').value = '18,00';
-            
-            // Устанавливаем даты для 31 дня просрочки
+            // Только даты устанавливаем по умолчанию
             const today = new Date();
-            const dueDate = new Date();
-            dueDate.setDate(today.getDate() - 31);
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
             
             document.getElementById('actualDate').value = today.toISOString().split('T')[0];
-            document.getElementById('dueDate').value = dueDate.toISOString().split('T')[0];
+            document.getElementById('dueDate').value = thirtyDaysAgo.toISOString().split('T')[0];
             
             calculateDays();
         });
