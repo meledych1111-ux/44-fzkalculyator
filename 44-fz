@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Калькулятор пени по 44-ФЗ</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .calculator { border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; max-width: 500px; }
+        label { display: block; margin-top: 10px; }
+        input[type="number"] { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
+        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background-color: #45a049; }
+        #result { display: none; background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #4CAF50; margin-top: 20px; }
+        #warning { color: #D63301; background-color: #FFCCBA; padding: 10px; border-radius: 4px; margin-top: 10px; display: none; }
+        .hint { font-size: 0.9em; color: #666; }
+    </style>
+</head>
+<body>
+
+    <h2>Калькулятор пени по 44-ФЗ для поставщика</h2>
+    <p><strong>Формула:</strong> П = (Ц - И) × (1/300 × КСЦБ) × ДП</p>
+
+    <div class="calculator">
+        <label for="contractPrice"><b>Цена контракта (Ц), руб.: *</b></label>
+        <input type="number" id="contractPrice" min="0" step="any" required placeholder="Например, 1000000">
+
+        <label for="executedAmount"><b>Сумма исполненных обязательств (И), руб.: *</b></label>
+        <input type="number" id="executedAmount" min="0" step="any" required placeholder="Например, 500000">
+        <p class="hint">Сумма, которую заказчик уже принял по акту.</p>
+
+        <label for="keyRate"><b>Ключевая ставка ЦБ РФ (КСЦБ), %: *</b></label>
+        <input type="number" id="keyRate" min="0" step="0.01" required placeholder="Например, 16.00">
+        <p class="hint">Узнайте актуальную ставку на <a href="https://cbr.ru/" target="_blank">сайте ЦБ РФ</a>. Введите значение без знака "%".</p>
+        <div id="warning">
+            <strong>Внимание!</strong> Введенная ключевая ставка выглядит нереалистично. Пожалуйста, проверьте, что значение указано верно. Актуальную ставку можно проверить на <a href="https://cbr.ru/" target="_blank">cbr.ru</a>.
+        </div>
+
+        <label for="delayDays"><b>Число дней просрочки (ДП): *</b></label>
+        <input type="number" id="delayDays" min="1" step="1" required placeholder="Например, 10">
+        <p class="hint">Первый день просрочки - следующий после даты исполнения обязательства по контракту.</p>
+
+        <button onclick="calculatePenalty()">Рассчитать пеню</button>
+    </div>
+
+    <div id="result">
+        <p><strong>Исходные данные:</strong></p>
+        <p id="inputData"></p>
+        <p><strong>Формула расчета:</strong></p>
+        <p id="calculationFormula"></p>
+        <p><strong>Сумма пени к уплате:</strong></p>
+        <p id="penaltyResult"></p>
+    </div>
+
+    <p class="hint">* - Обязательные поля для заполнения.</p>
+
+    <script>
+        function calculatePenalty() {
+            // Сбрасываем предупреждение и результат
+            document.getElementById('warning').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+
+            // Получаем значения из полей ввода
+            const C = parseFloat(document.getElementById('contractPrice').value);
+            const I = parseFloat(document.getElementById('executedAmount').value);
+            const KS = parseFloat(document.getElementById('keyRate').value);
+            const DP = parseInt(document.getElementById('delayDays').value);
+
+            // ПРОВЕРКА №1: Заполнены ли все поля
+            if (isNaN(C) || isNaN(I) || isNaN(KS) || isNaN(DP) || C < 0 || I < 0 || KS < 0 || DP < 1) {
+                alert("Пожалуйста, заполните все поля корректно. Все значения должны быть положительными числами, а дни просрочки - не менее 1.");
+                return;
+            }
+
+            // ПРОВЕРКА №2: Сумма исполненных обязательств не превышает цену контракта
+            if (I > C) {
+                alert("Внимание! Сумма исполненных обязательств (И) не может превышать цену контракта (Ц). Проверьте введенные данные.");
+                return;
+            }
+
+            // ПРОВЕРКА №3: Ключевая ставка в реалистичных пределах (например, от 1% до 25%)
+            // Это защита от опечаток (например, 0.16 вместо 16 или 150 вместо 15)
+            if (KS < 1 || KS > 25) {
+                document.getElementById('warning').style.display = 'block';
+                // Не прерываем расчет, а просто предупреждаем пользователя.
+            }
+
+            // Рассчитываем пеню по формуле: (Ц - И) * (КС / 100 / 300) * ДП
+            const base = C - I; // База для расчета (неисполненная часть)
+            const penalty = base * (KS / 100 / 300) * DP;
+
+            // Форматируем числа для красивого вывода (с пробелами тысяч и двумя знаками после запятой)
+            const formatNumber = (num) => {
+                return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+            };
+
+            // Показываем блок с результатом
+            document.getElementById('result').style.display = 'block';
+
+            // Заполняем блоки с результатами
+            document.getElementById('inputData').innerHTML = `
+                Цена контракта (Ц) = <b>${formatNumber(C)}</b> руб.<br>
+                Принятые обязательства (И) = <b>${formatNumber(I)}</b> руб.<br>
+                Неисполненная часть (Ц - И) = <b>${formatNumber(base)}</b> руб.<br>
+                Ключевая ставка ЦБ (КСЦБ) = <b>${KS}%</b><br>
+                Дни просрочки (ДП) = <b>${DP}</b>
+            `;
+
+            document.getElementById('calculationFormula').innerHTML = `
+                <b>П = (Ц - И) × (1/300 × КСЦБ) × ДП</b><br>
+                <b>П = (${formatNumber(C)} - ${formatNumber(I)}) × (1/300 × ${KS}%) × ${DP}</b><br>
+                <b>П = ${formatNumber(base)} × ${(KS/100/300).toFixed(7)} × ${DP}</b>
+            `;
+
+            document.getElementById('penaltyResult').innerHTML = `
+                <span style="font-size: 1.2em; font-weight: bold;">${formatNumber(penalty)} руб.</span>
+            `;
+        }
+    </script>
+</body>
+</html>
