@@ -1,5 +1,6 @@
 Калькулятор производит расчет пени просрочки обязательств поставщиком (подрядчиком, исполнителем), в соответствии с требованиями  Федерального закона 44-ФЗ
-![IMG_9193](https://github.com/user-attachments/assets/60951147-1c9e-4cd4-ba57-70969a36c959)
-![IMG_9194](https://github.com/user-attachments/assets/3880f223-9f10-47e3-a425-f8968d66050d)
+![IMG_9196](https://github.com/user-attachments/assets/a53e3ec6-3c36-4367-a1b8-2ab939fda76b)
+![IMG_9197](https://github.com/user-attachments/assets/d1a95c23-947e-41ec-9875-fb8240229fb5)
+
 
 
