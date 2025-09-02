@@ -29,13 +29,6 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 600px;
-            transform: translateY(0);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
 
         .header {
@@ -100,12 +93,7 @@
             outline: none;
             border-color: #6a11cb;
             box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
-            transform: scale(1.02);
             background: white;
-        }
-
-        input:hover {
-            border-color: #b399ff;
         }
 
         .hint {
@@ -126,19 +114,10 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            transform: translateY(0);
-            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
         }
 
         .calculate-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(106, 17, 203, 0.4);
             background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
-        }
-
-        .calculate-btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 3px 10px rgba(106, 17, 203, 0.3);
         }
 
         .result-container {
@@ -148,18 +127,6 @@
             border-radius: 15px;
             margin-top: 30px;
             border-left: 5px solid #28a745;
-            animation: slideIn 0.5s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .result-item {
@@ -186,13 +153,6 @@
             margin: 15px 0;
             color: #856404;
             display: none;
-            animation: shake 0.5s ease;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
         }
 
         .days-info {
@@ -202,6 +162,16 @@
             border-left: 4px solid #2196f3;
             margin: 15px 0;
             display: none;
+        }
+
+        .legal-note {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #6c757d;
+            margin: 15px 0;
+            font-size: 0.9em;
+            color: #495057;
         }
 
         @media (max-width: 768px) {
@@ -234,6 +204,10 @@
 
         <div class="formula-box">
             <div class="formula">П = (Ц - И) × (1/300 × КСЦБ) × ДП</div>
+        </div>
+
+        <div class="legal-note">
+            <strong>Важно:</strong> Дата исполнения обязательств включается в период просрочки согласно 44-ФЗ.
         </div>
 
         <div class="input-group">
@@ -292,13 +266,11 @@
     <script>
         // Функции для точных вычислений с деньгами
         function parseMoney(value) {
-            // Заменяем запятые на точки и убираем пробелы
             const cleaned = value.replace(/[^\d,]/g, '').replace(',', '.');
             return parseFloat(cleaned) || 0;
         }
 
         function formatMoney(amount) {
-            // Округляем до 2 знаков после запятой и форматируем с пробелами тысяч
             return new Intl.NumberFormat('ru-RU', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
@@ -306,7 +278,6 @@
         }
 
         function preciseMultiply(a, b) {
-            // Умножение с точностью до копеек
             return Math.round(a * b * 100) / 100;
         }
 
@@ -323,8 +294,9 @@
                 return 0;
             }
 
+            // ИСПРАВЛЕННЫЙ РАСЧЕТ: Дата исполнения ВКЛЮЧАЕТСЯ в период просрочки
             const timeDiff = actualDate - dueDate;
-            const daysDiff = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+            const daysDiff = Math.max(0, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
 
             daysInfo.style.display = 'block';
             
@@ -333,7 +305,7 @@
                 calculateBtn.disabled = true;
             } else {
                 daysCalculation.innerHTML = `
-                    📅 Дата исполнения: <b>${dueDate.toLocaleDateString('ru-RU')}</b><br>
+                    📅 Дата исполнения: <b>${dueDate.toLocaleDateString('ru-RU')}</b> (включается в просрочку)<br>
                     📅 Фактическая дата: <b>${actualDate.toLocaleDateString('ru-RU')}</b><br>
                     ⏰ Дней просрочки (ДП): <b>${daysDiff}</b> дней
                 `;
