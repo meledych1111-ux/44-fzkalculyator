@@ -120,6 +120,11 @@
             background: linear-gradient(135deg, #2575fc 0%, #6a11cb 100%);
         }
 
+        .calculate-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
         .result-container {
             display: none;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -152,6 +157,16 @@
             padding: 15px;
             margin: 15px 0;
             color: #856404;
+            display: none;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #721c24;
             display: none;
         }
 
@@ -235,6 +250,10 @@
             <input type="date" id="actualDate" required>
             <p class="hint">Дата, когда работы/товар были фактически приняты заказчиком</p>
 
+            <div class="error" id="dateError">
+                <strong>Ошибка!</strong> Дата исполнения не может быть раньше даты начала обязательств.
+            </div>
+
             <div class="days-info" id="daysInfo">
                 <strong>Расчет дней просрочки:</strong>
                 <div id="daysCalculation"></div>
@@ -285,8 +304,21 @@
             const daysInfo = document.getElementById('daysInfo');
             const daysCalculation = document.getElementById('daysCalculation');
             const calculateBtn = document.getElementById('calculateBtn');
+            const dateError = document.getElementById('dateError');
+
+            // Сбрасываем ошибки
+            dateError.style.display = 'none';
+            document.getElementById('result').style.display = 'none';
 
             if (isNaN(dueDate.getTime()) || isNaN(actualDate.getTime())) {
+                daysInfo.style.display = 'none';
+                calculateBtn.disabled = true;
+                return 0;
+            }
+
+            // Проверка: дата исполнения не может быть раньше даты начала
+            if (actualDate < dueDate) {
+                dateError.style.display = 'block';
                 daysInfo.style.display = 'none';
                 calculateBtn.disabled = true;
                 return 0;
@@ -316,15 +348,22 @@
         function calculatePenalty() {
             const result = document.getElementById('result');
             const warning = document.getElementById('warning');
+            const dateError = document.getElementById('dateError');
             
             result.style.display = 'none';
             warning.style.display = 'none';
+            dateError.style.display = 'none';
 
             // Парсим значения в копейках для точности
             const C_kopeks = parseMoneyToKopeks(document.getElementById('contractPrice').value);
             const I_kopeks = parseMoneyToKopeks(document.getElementById('executedAmount').value);
             const KS = parseFloat(document.getElementById('keyRate').value.replace(',', '.'));
             const DP = calculateDays();
+
+            // Если просрочки нет - не показываем результат
+            if (DP === 0) {
+                return;
+            }
 
             // Валидация
             if (C_kopeks <= 0 || I_kopeks < 0 || KS <= 0 || DP === 0 || I_kopeks > C_kopeks) {
