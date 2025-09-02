@@ -2,107 +2,286 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Калькулятор пени по 44-ФЗ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор пени по 44-ФЗ для поставщика</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .calculator { border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 20px; max-width: 500px; }
-        label { display: block; margin-top: 10px; }
-        input[type="number"] { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; }
-        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-        button:hover { background-color: #45a049; }
-        #result { display: none; background-color: #f9f9f9; padding: 15px; border-radius: 5px; border-left: 4px solid #4CAF50; margin-top: 20px; }
-        #warning { color: #D63301; background-color: #FFCCBA; padding: 10px; border-radius: 4px; margin-top: 10px; display: none; }
-        .hint { font-size: 0.9em; color: #666; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f5f5f5; 
+        }
+        .container { 
+            background: white; 
+            border-radius: 10px; 
+            padding: 25px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+        }
+        h1, h2 { 
+            color: #2c3e50; 
+            text-align: center; 
+        }
+        h1 { 
+            margin-bottom: 10px; 
+            font-size: 2.2em; 
+        }
+        h2 { 
+            font-size: 1.4em; 
+            font-weight: normal; 
+            margin-bottom: 25px; 
+            color: #7f8c8d; 
+        }
+        .formula { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 6px; 
+            border-left: 4px solid #3498db; 
+            margin: 20px 0; 
+            font-family: monospace; 
+            font-size: 1.1em; 
+        }
+        label { 
+            display: block; 
+            margin: 15px 0 5px 0; 
+            font-weight: bold; 
+            color: #2c3e50; 
+        }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            transition: border-color 0.3s; 
+        }
+        input[type="date"] {
+            padding: 11px;
+        }
+        input:focus { 
+            border-color: #3498db; 
+            outline: none; 
+        }
+        .hint { 
+            font-size: 0.9em; 
+            color: #7f8c8d; 
+            margin: 5px 0 15px 0; 
+        }
+        .btn { 
+            background: #27ae60; 
+            color: white; 
+            padding: 14px 25px; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            width: 100%; 
+            margin: 20px 0; 
+            transition: background 0.3s; 
+        }
+        .btn:hover { 
+            background: #219a52; 
+        }
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        #warning { 
+            background: #ffeaa7; 
+            border: 2px solid #fdcb6e; 
+            border-radius: 6px; 
+            padding: 12px; 
+            margin: 15px 0; 
+            display: none; 
+        }
+        #result { 
+            display: none; 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 6px; 
+            border-left: 4px solid #27ae60; 
+            margin: 20px 0; 
+        }
+        .result-item { 
+            margin: 12px 0; 
+        }
+        .final-result { 
+            font-size: 1.4em; 
+            font-weight: bold; 
+            color: #27ae60; 
+            text-align: center; 
+            margin: 20px 0; 
+            padding: 15px; 
+            background: white; 
+            border-radius: 6px; 
+            border: 2px dashed #27ae60; 
+        }
+        .days-info {
+            background: #e8f4fc;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            margin: 10px 0;
+        }
+        a { 
+            color: #3498db; 
+            text-decoration: none; 
+        }
+        a:hover { 
+            text-decoration: underline; 
+        }
+        @media (max-width: 600px) {
+            body { 
+                padding: 15px; 
+            }
+            .container { 
+                padding: 20px; 
+            }
+            h1 { 
+                font-size: 1.8em; 
+            }
+        }
     </style>
 </head>
 <body>
-
-    <h2>Калькулятор пени по 44-ФЗ для поставщика</h2>
-    <p><strong>Формула:</strong> П = (Ц - И) × (1/300 × КСЦБ) × ДП</p>
-
-    <div class="calculator">
-        <label for="contractPrice"><b>Цена контракта (Ц), руб.: *</b></label>
-        <input type="number" id="contractPrice" min="0" step="any" required placeholder="Например, 1000000">
-
-        <label for="executedAmount"><b>Сумма исполненных обязательств (И), руб.: *</b></label>
-        <input type="number" id="executedAmount" min="0" step="any" required placeholder="Например, 500000">
-        <p class="hint">Сумма, которую заказчик уже принял по акту.</p>
-
-        <label for="keyRate"><b>Ключевая ставка ЦБ РФ (КСЦБ), %: *</b></label>
-        <input type="number" id="keyRate" min="0" step="0.01" required placeholder="Например, 16.00">
-        <p class="hint">Узнайте актуальную ставку на <a href="https://cbr.ru/" target="_blank">сайте ЦБ РФ</a>. Введите значение без знака "%".</p>
-        <div id="warning">
-            <strong>Внимание!</strong> Введенная ключевая ставка выглядит нереалистично. Пожалуйста, проверьте, что значение указано верно. Актуальную ставку можно проверить на <a href="https://cbr.ru/" target="_blank">cbr.ru</a>.
+    <div class="container">
+        <h1>Калькулятор пени по 44-ФЗ</h1>
+        <h2>для поставщика (исполнителя, подрядчика)</h2>
+        
+        <div class="formula">
+            П = (Ц - И) × (1/300 × КСЦБ) × ДП
         </div>
 
-        <label for="delayDays"><b>Число дней просрочки (ДП): *</b></label>
-        <input type="number" id="delayDays" min="1" step="1" required placeholder="Например, 10">
-        <p class="hint">Первый день просрочки - следующий после даты исполнения обязательства по контракту.</p>
+        <div class="input-group">
+            <label for="contractPrice">Цена контракта (Ц), руб.:</label>
+            <input type="number" id="contractPrice" min="0" step="any" placeholder="Например, 1000000" required>
+            <p class="hint">Общая стоимость контракта согласно документации</p>
 
-        <button onclick="calculatePenalty()">Рассчитать пеню</button>
+            <label for="executedAmount">Сумма исполненных обязательств (И), руб.:</label>
+            <input type="number" id="executedAmount" min="0" step="any" placeholder="Например, 500000" required>
+            <p class="hint">Сумма, которую заказчик уже принял по акту</p>
+
+            <label for="keyRate">Ключевая ставка ЦБ РФ (КСЦБ), %:</label>
+            <input type="number" id="keyRate" min="0" step="0.01" placeholder="Например, 16.00" required>
+            <p class="hint">Узнайте актуальную ставку на <a href="https://cbr.ru/" target="_blank">сайте ЦБ РФ</a></p>
+
+            <div id="warning">
+                <strong>Внимание!</strong> Введенная ключевая ставка выглядит нереалистично. Пожалуйста, проверьте, что значение указано верно. Актуальную ставку можно проверить на <a href="https://cbr.ru/" target="_blank">cbr.ru</a>.
+            </div>
+
+            <label for="dueDate">Дата исполнения обязательства по контракту:</label>
+            <input type="date" id="dueDate" required>
+            <p class="hint">Дата, до которой должны были быть выполнены работы/поставлен товар</p>
+
+            <label for="actualDate">Фактическая дата исполнения обязательства:</label>
+            <input type="date" id="actualDate" required>
+            <p class="hint">Дата, когда работы/товар были фактически приняты заказчиком</p>
+
+            <div id="daysInfo" class="days-info" style="display: none;">
+                <strong>Расчет дней просрочки:</strong>
+                <div id="daysCalculation"></div>
+            </div>
+        </div>
+
+        <button class="btn" id="calculateBtn" onclick="calculatePenalty()">Рассчитать пеню</button>
+
+        <div id="result">
+            <div class="result-item">
+                <strong>Исходные данные:</strong>
+                <div id="inputData"></div>
+            </div>
+            
+            <div class="result-item">
+                <strong>Формула расчета:</strong>
+                <div id="calculationFormula"></div>
+            </div>
+            
+            <div class="result-item">
+                <strong>Сумма пени к уплате:</strong>
+                <div id="penaltyResult" class="final-result"></div>
+            </div>
+        </div>
     </div>
-
-    <div id="result">
-        <p><strong>Исходные данные:</strong></p>
-        <p id="inputData"></p>
-        <p><strong>Формула расчета:</strong></p>
-        <p id="calculationFormula"></p>
-        <p><strong>Сумма пени к уплате:</strong></p>
-        <p id="penaltyResult"></p>
-    </div>
-
-    <p class="hint">* - Обязательные поля для заполнения.</p>
 
     <script>
-        function calculatePenalty() {
-            // Сбрасываем предупреждение и результат
-            document.getElementById('warning').style.display = 'none';
-            document.getElementById('result').style.display = 'none';
+        function calculateDays() {
+            const dueDate = new Date(document.getElementById('dueDate').value);
+            const actualDate = new Date(document.getElementById('actualDate').value);
+            const daysInfo = document.getElementById('daysInfo');
+            const daysCalculation = document.getElementById('daysCalculation');
+            const calculateBtn = document.getElementById('calculateBtn');
 
-            // Получаем значения из полей ввода
-            const C = parseFloat(document.getElementById('contractPrice').value);
-            const I = parseFloat(document.getElementById('executedAmount').value);
-            const KS = parseFloat(document.getElementById('keyRate').value);
-            const DP = parseInt(document.getElementById('delayDays').value);
-
-            // ПРОВЕРКА №1: Заполнены ли все поля
-            if (isNaN(C) || isNaN(I) || isNaN(KS) || isNaN(DP) || C < 0 || I < 0 || KS < 0 || DP < 1) {
-                alert("Пожалуйста, заполните все поля корректно. Все значения должны быть положительными числами, а дни просрочки - не менее 1.");
+            if (isNaN(dueDate.getTime()) || isNaN(actualDate.getTime())) {
+                daysInfo.style.display = 'none';
+                calculateBtn.disabled = true;
                 return;
             }
 
-            // ПРОВЕРКА №2: Сумма исполненных обязательств не превышает цену контракта
+            // Вычисляем разницу в миллисекундах и переводим в дни
+            const timeDiff = actualDate - dueDate;
+            const daysDiff = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+
+            daysInfo.style.display = 'block';
+            
+            if (daysDiff === 0) {
+                daysCalculation.innerHTML = 'Просрочки нет. Обязательства исполнены в срок.';
+                calculateBtn.disabled = true;
+            } else {
+                daysCalculation.innerHTML = `
+                    Дата исполнения: <b>${dueDate.toLocaleDateString('ru-RU')}</b><br>
+                    Фактическая дата: <b>${actualDate.toLocaleDateString('ru-RU')}</b><br>
+                    Дней просрочки (ДП): <b>${daysDiff}</b> дней
+                `;
+                calculateBtn.disabled = false;
+            }
+
+            return daysDiff;
+        }
+
+        function calculatePenalty() {
+            document.getElementById('warning').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+
+            const C = parseFloat(document.getElementById('contractPrice').value);
+            const I = parseFloat(document.getElementById('executedAmount').value);
+            const KS = parseFloat(document.getElementById('keyRate').value);
+            const DP = calculateDays(); // Получаем дни просрочки из функции
+
+            if (isNaN(C) || isNaN(I) || isNaN(KS) || isNaN(DP) || C < 0 || I < 0 || KS < 0 || DP === 0) {
+                alert("Пожалуйста, заполните все поля корректно. Проверьте даты - просрочка должна быть больше 0 дней.");
+                return;
+            }
+
             if (I > C) {
                 alert("Внимание! Сумма исполненных обязательств (И) не может превышать цену контракта (Ц). Проверьте введенные данные.");
                 return;
             }
 
-            // ПРОВЕРКА №3: Ключевая ставка в реалистичных пределах (например, от 1% до 25%)
-            // Это защита от опечаток (например, 0.16 вместо 16 или 150 вместо 15)
             if (KS < 1 || KS > 25) {
                 document.getElementById('warning').style.display = 'block';
-                // Не прерываем расчет, а просто предупреждаем пользователя.
             }
 
-            // Рассчитываем пеню по формуле: (Ц - И) * (КС / 100 / 300) * ДП
-            const base = C - I; // База для расчета (неисполненная часть)
+            const base = C - I;
             const penalty = base * (KS / 100 / 300) * DP;
 
-            // Форматируем числа для красивого вывода (с пробелами тысяч и двумя знаками после запятой)
             const formatNumber = (num) => {
-                return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+                return new Intl.NumberFormat('ru-RU', { 
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2 
+                }).format(num);
             };
 
-            // Показываем блок с результатом
             document.getElementById('result').style.display = 'block';
-
-            // Заполняем блоки с результатами
             document.getElementById('inputData').innerHTML = `
                 Цена контракта (Ц) = <b>${formatNumber(C)}</b> руб.<br>
                 Принятые обязательства (И) = <b>${formatNumber(I)}</b> руб.<br>
                 Неисполненная часть (Ц - И) = <b>${formatNumber(base)}</b> руб.<br>
-                Ключевая ставка ЦБ (КСЦБ) = <b>${KS}%</b><br>
-                Дни просрочки (ДП) = <b>${DP}</b>
+                Ключевая ставка ЦБ = <b>${KS}%</b><br>
+                Дней просрочки = <b>${DP}</b>
             `;
 
             document.getElementById('calculationFormula').innerHTML = `
@@ -111,10 +290,26 @@
                 <b>П = ${formatNumber(base)} × ${(KS/100/300).toFixed(7)} × ${DP}</b>
             `;
 
-            document.getElementById('penaltyResult').innerHTML = `
-                <span style="font-size: 1.2em; font-weight: bold;">${formatNumber(penalty)} руб.</span>
-            `;
+            document.getElementById('penaltyResult').innerHTML = `${formatNumber(penalty)} руб.`;
         }
+
+        // Добавляем обработчики событий для автоматического расчета дней
+        document.getElementById('dueDate').addEventListener('change', calculateDays);
+        document.getElementById('actualDate').addEventListener('change', calculateDays);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Устанавливаем сегодняшнюю дату как дату фактического исполнения по умолчанию
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('actualDate').value = today;
+            
+            // Устанавливаем дату исполнения на 30 дней назад по умолчанию
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            document.getElementById('dueDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            
+            // Вычисляем дни при загрузке страницы
+            calculateDays();
+        });
     </script>
 </body>
 </html>
