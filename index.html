@@ -264,10 +264,12 @@
     </div>
 
     <script>
-        // Функции для точных вычислений с деньгами
-        function parseMoney(value) {
+        // Функции для точных вычислений с деньгами (в копейках)
+        function parseMoneyToKopeks(value) {
             const cleaned = value.replace(/[^\d,]/g, '').replace(',', '.');
-            return parseFloat(cleaned) || 0;
+            const rubles = parseFloat(cleaned) || 0;
+            // Переводим в копейки для точных вычислений
+            return Math.round(rubles * 100);
         }
 
         function formatMoney(amount) {
@@ -277,9 +279,8 @@
             }).format(amount);
         }
 
-        function preciseMultiply(a, b) {
-            // Точное умножение с округлением до копеек
-            return Math.round((a * b) * 100) / 100;
+        function formatFromKopeks(kopeks) {
+            return (kopeks / 100).toFixed(2);
         }
 
         function calculateDays() {
@@ -323,14 +324,14 @@
             result.style.display = 'none';
             warning.style.display = 'none';
 
-            // Парсим значения с учетом денежного формата
-            const C = parseMoney(document.getElementById('contractPrice').value);
-            const I = parseMoney(document.getElementById('executedAmount').value);
-            const KS = parseMoney(document.getElementById('keyRate').value);
+            // Парсим значения в копейках для точности
+            const C_kopeks = parseMoneyToKopeks(document.getElementById('contractPrice').value);
+            const I_kopeks = parseMoneyToKopeks(document.getElementById('executedAmount').value);
+            const KS = parseFloat(document.getElementById('keyRate').value.replace(',', '.'));
             const DP = calculateDays();
 
             // Валидация
-            if (C <= 0 || I < 0 || KS <= 0 || DP === 0 || I > C) {
+            if (C_kopeks <= 0 || I_kopeks < 0 || KS <= 0 || DP === 0 || I_kopeks > C_kopeks) {
                 alert("Пожалуйста, проверьте введенные данные. Все значения должны быть корректными.");
                 return;
             }
@@ -339,10 +340,18 @@
                 warning.style.display = 'block';
             }
 
-            // Точный расчет по формуле: (Ц-И) × (1/300 × КСЦБ) × ДП
-            const base = C - I; // (Ц-И)
-            const dailyRate = (KS / 100) / 300; // (1/300 × КСЦБ)
-            const penalty = preciseMultiply(preciseMultiply(base, dailyRate), DP);
+            // Точный расчет в копейках
+            const base_kopeks = C_kopeks - I_kopeks; // (Ц-И) в копейках
+            const dailyRate = KS / 100 / 300; // (1/300 × КСЦБ)
+            
+            // Вычисляем пеню в копейках с точным округлением
+            const penalty_kopeks = Math.round(base_kopeks * dailyRate * DP);
+            
+            // Переводим обратно в рубли
+            const penalty = penalty_kopeks / 100;
+            const base = base_kopeks / 100;
+            const C = C_kopeks / 100;
+            const I = I_kopeks / 100;
 
             // Форматируем вывод
             document.getElementById('inputData').innerHTML = `
@@ -356,7 +365,7 @@
             document.getElementById('calculationFormula').innerHTML = `
                 <b>П = (Ц - И) × (1/300 × КСЦБ) × ДП</b><br>
                 <b>П = (${formatMoney(C)} - ${formatMoney(I)}) × (1/300 × ${KS}%) × ${DP}</b><br>
-                <b>П = ${formatMoney(base)} × ${dailyRate.toFixed(7)} × ${DP}</b>
+                <b>П = ${formatMoney(base)} × ${(KS/100/300).toFixed(7)} × ${DP}</b>
             `;
 
             document.getElementById('penaltyResult').innerHTML = `${formatMoney(penalty)} руб.`;
